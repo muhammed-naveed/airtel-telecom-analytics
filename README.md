@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Airtel Telecom Analytics
 
 A data analysis project, Semester 3 OJT: Airtel subscriber data.
@@ -14,3 +15,6 @@ Written in Step 8.
 
 ## Progress
 - Step 0: environment, repository and data receipt
+=======
+# airtel-telecom-analytics
+>>>>>>> 7b21b2595c1d1c70216d6fe61036dd9200fed8cc

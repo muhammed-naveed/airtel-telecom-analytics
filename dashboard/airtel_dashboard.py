@@ -49,12 +49,17 @@ def find_database():
     """Find a database that actually contains the required customer_features schema."""
     override = os.getenv("AIRTEL_DB_PATH")
     candidates = [Path(override).expanduser()] if override else [
+        ROOT / "data" / "raw" / "airtel_dashboard_slim.db",
+        APP_DIR / "data" / "raw" / "airtel_dashboard_slim.db",
         ROOT / "data" / "raw" / "airtel.db",
         APP_DIR / "data" / "raw" / "airtel.db",
         ROOT / "data" / "airtel.db",
         ROOT / "airtel.db",
     ]
     if not override and ROOT.exists():
+        for path in ROOT.rglob("airtel_dashboard_slim.db"):
+            if path not in candidates:
+                candidates.append(path)
         for path in ROOT.rglob("airtel.db"):
             if path not in candidates:
                 candidates.append(path)
@@ -1243,7 +1248,7 @@ def main():
     if db_path is None:
         st.error("Airtel database not found. No file was created. Looked in:\n\n"
                  + "\n".join(f"- `{p}`" for p in searched)
-                 + "\n\nPlace airtel.db there or set the AIRTEL_DB_PATH environment variable.")
+                 + "\n\nPlace airtel_dashboard_slim.db in data/raw/ or set AIRTEL_DB_PATH.")
         st.stop()
     try:
         df = load_data(str(db_path), db_path.stat().st_mtime_ns)

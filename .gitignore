@@ -7,5 +7,4 @@ __pycache__/
 Thumbs.db
 dashboard/.streamlit/secrets.toml
 dashboard/.streamlit/data/raw/airtel.db
-
 data/raw/airtel.db

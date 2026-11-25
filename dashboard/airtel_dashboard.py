@@ -54,6 +54,10 @@ def find_database():
         ROOT / "data" / "airtel.db",
         ROOT / "airtel.db",
     ]
+    if not override:
+        for path in ROOT.rglob("airtel.db"):
+            if path not in candidates:
+                candidates.append(path)
     for path in candidates:
         if path.is_file():
             return path.resolve(), candidates

@@ -7,3 +7,5 @@ __pycache__/
 .ipynb_checkpoints/
 .DS_Store
 Thumbs.db
+dashboard/.streamlit/secrets.toml
+dashboard/.streamlit/

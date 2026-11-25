@@ -46,7 +46,7 @@ st.set_page_config(page_title="Airtel Telecom Analytics", page_icon="📶", layo
 
 # ---------------------------------------------------------------- database
 def find_database():
-    """AIRTEL_DB_PATH wins; otherwise search the project folders. Never creates a file."""
+    """Find a database that actually contains the required customer_features schema."""
     override = os.getenv("AIRTEL_DB_PATH")
     candidates = [Path(override).expanduser()] if override else [
         ROOT / "data" / "raw" / "airtel.db",
@@ -54,14 +54,39 @@ def find_database():
         ROOT / "data" / "airtel.db",
         ROOT / "airtel.db",
     ]
-    if not override:
+    if not override and ROOT.exists():
         for path in ROOT.rglob("airtel.db"):
             if path not in candidates:
                 candidates.append(path)
+
+    checked, seen = [], set()
     for path in candidates:
-        if path.is_file():
-            return path.resolve(), candidates
-    return None, candidates
+        try:
+            path = path.resolve()
+        except OSError:
+            continue
+        if path in seen:
+            continue
+        seen.add(path)
+        if not path.is_file():
+            checked.append(f"{path} (not found)")
+            continue
+        try:
+            uri = path.as_uri() + "?mode=ro"
+            with closing(sqlite3.connect(uri, uri=True, timeout=3)) as con:
+                tables = {r[0] for r in con.execute("SELECT name FROM sqlite_master WHERE type='table' OR type='view'")}
+                if "customer_features" not in tables:
+                    checked.append(f"{path} (customer_features table missing; tables: {', '.join(sorted(tables)) or 'none'})")
+                    continue
+                present = {r[1] for r in con.execute("PRAGMA table_info(customer_features)")}
+                missing = [c for c in REQUIRED if c not in present]
+                if missing:
+                    checked.append(f"{path} (missing columns: {', '.join(missing)})")
+                    continue
+            return path, checked
+        except sqlite3.Error as e:
+            checked.append(f"{path} (SQLite error: {e})")
+    return None, checked
 
 
 @st.cache_data(show_spinner="Reading the Airtel database…")
